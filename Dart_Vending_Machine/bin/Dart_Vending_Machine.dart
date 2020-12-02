@@ -8,7 +8,6 @@ import 'dart:io';
 
 DataSource<Item> itemDataSource;
 
-
 void main(List<String> arguments) {
   ////deal with the command line args
   //final ArgParser cliParser = new ArgParser();
@@ -53,11 +52,12 @@ void main(List<String> arguments) {
   print('***************** Vendo-Matic 800 Vending Machine ****************');
   print('******************************************************************');
   print('******************************************************************\n');
-  int showMainMenuOption = showMenu(mainMenuMessage);
+  int showMainMenuOption = 0;
   double moneyAvailable = 0;
   Map<Item, int> selectedItems = {};
 
   while (showMainMenuOption != 3) {
+    showMainMenuOption = showMenu(mainMenuMessage);
     switch (showMainMenuOption) {
       case 1: //display vending machine items
         print('\n%%%%%%% Vending Machine Inventory::');
@@ -78,36 +78,42 @@ void main(List<String> arguments) {
               moneyAvailable += addMoney();
               break;
             case 2:
-            //select product
+              //select product
               selectProduct(selectedItems, moneyAvailable);
-              //print('###############################################');
-              //selectedItems.forEach((key, value) { print('$key :::: $value'); });
               break;
             case 3:
-            //finalize transaction
-              print('\n%%%%%%% Vending Machine <Selected Items> ::');
-              selectedItems.forEach((key, value) {
-                print('x$value | $key ');
-              });
+              //finalize transaction
+              if (selectedItems.isNotEmpty) {
+                print('\n%%%%%%% Vending Machine <Selected Items> ::');
+                selectedItems.forEach((key, value) {
+                  print('x$value | $key ');
+                });
+              }
               int showFinalizeMenuOption = showMenu(finishMenuMessage);
-               switch (showFinalizeMenuOption){
-                 case 1:
-                    finishTransactionMenu(selectedItems, moneyAvailable);
-                    moneyAvailable = 0;
-                    selectedItems.clear();
-                    showPurchaseMenuOption = 3;
-                    break;
-                 case 2:
-                    moneyAvailable = 0;
-                    selectedItems.clear();
-                    showPurchaseMenuOption = 3;
-                    break;
-                 case 3:
-               }
+              if (showFinalizeMenuOption == 3) {
+                //continue option
+                print('\n');
+              } else {
+                if (showFinalizeMenuOption == 2) {
+                  //cancel transaction
+                  selectedItems.clear();
+                }
+                //finish/cancel the transaction
+                finishTransaction(selectedItems, moneyAvailable);
+                moneyAvailable = 0;
+                selectedItems.clear();
+                showPurchaseMenuOption = 3;
+                showMainMenuOption = 3;
+              }
           }
         }
+        break;
+      case 3: //exit
+        if (selectedItems.isNotEmpty || moneyAvailable > 0) {
+          print('\n\nPlease use the Purchase menu option to finish or cancel your transaction\n\n');
+          showMainMenuOption = 0;
+        }
     }
-    showMainMenuOption = showMenu(mainMenuMessage);
   }
 }
 
@@ -117,8 +123,7 @@ int showMenu(String message) {
   try {
     menuOption = int.parse(stdin.readLineSync());
   } on FormatException {
-    print(
-        'Invalid main option. Please enter a valid menu option from the available choices');
+    print('Invalid main option. Please enter a valid menu option from the available choices');
   }
   return menuOption;
 }
@@ -137,59 +142,77 @@ int addMoney() {
         valid = true;
     }
   } on FormatException {
-    print(
-        'Invalid main option. Please enter a valid menu option from the available choices');
+    print('Invalid main option. Please enter a valid menu option from the available choices');
   }
   return valid ? amount : 0;
 }
 
-void finishTransactionMenu(Map<Item, int> selectedItems, double moneyAvailable){
-   double balance = getCreditBalance(selectedItems, moneyAvailable);
-   //dispense
-   print('Dispensing your $balance change.');
-   stdout.write('Dispensing your items . . . .');
-   //update inventory
-   selectedItems.forEach((key, qty) {
-     final item = itemDataSource.read(key.id);
-     if(item != null){
-       item.inventoryQuantity = item.inventoryQuantity - qty;
-       stdout.write('\n ${item.slot}  x$qty! ${item.inventoryQuantity} remaining.');
-     }
-   });
-   print('Items and change dispensed!\nThanks for the purchase! Enjoy!');
+void finishTransaction(Map<Item, int> selectedItems, double moneyAvailable) {
+  double balance = getCreditBalance(selectedItems, moneyAvailable);
+  int hasChange = 0, hasItems = 0;
+  //dispense
+  if (moneyAvailable > 0) {
+    print('\n\n%%%%%%% Vending Machine <Money Dispense> ::');
+    print('Dispensing your $balance ${selectedItems.isEmpty ? 'refund' : 'change'}');
+    hasChange = 1;
+  }
+  if (selectedItems.isNotEmpty) {
+    print('\n\n%%%%%%% Vending Machine <Item Dispense> ::');
+    print('Dispensing your items . . . .');
+    //update inventory
+    selectedItems.forEach((key, qty) {
+      final item = itemDataSource.read(key.id);
+      if (item != null) {
+        item.inventoryQuantity = item.inventoryQuantity - qty;
+        print(' {$qty}x ${item.name}!');
+      }
+    });
+    hasItems = 4;
+  }
+
+  int hasChangeAndItems = hasItems + hasChange;
+
+  switch (hasChangeAndItems) {
+    case 0: // no items or money
+    case 1: // no items but with money refund
+      print('\nThanks for stopping by, come back soon!');
+      break;
+    case 4: //items but no change
+      print('Items dispensed!\nThanks for the purchase! Enjoy!');
+      break;
+    case 5:
+      print('Items and change dispensed!\nThanks for the purchase! Enjoy!');
+  }
 }
 
-void selectProduct(Map<Item, int> selectedItems, double moneyAvailable){
+void selectProduct(Map<Item, int> selectedItems, double moneyAvailable) {
   stdout.write('\n%%%%%%% Vending Machine <Select Product> ::\nPlease enter the desired item code\n\nUser Input: ');
   String slot = stdin.readLineSync().toUpperCase();
   //https://stackoverflow.com/a/50523049
-  Item selectedItem =  itemDataSource.readAll().firstWhere((item) => item.slot == slot, orElse: () => null);
-  if(selectedItem != null){
-    int alreadySelectedQuantity = selectedItems.containsKey(selectedItem) ? selectedItems[selectedItem] :0;
-    if((selectedItem.inventoryQuantity - alreadySelectedQuantity) < 1){
+  Item selectedItem = itemDataSource.readAll().firstWhere((item) => item.slot == slot, orElse: () => null);
+  if (selectedItem != null) {
+    int alreadySelectedQuantity = selectedItems.containsKey(selectedItem) ? selectedItems[selectedItem] : 0;
+    if ((selectedItem.inventoryQuantity - alreadySelectedQuantity) < 1) {
       //quantity too low
       print('Item $slot | ${selectedItem.name} is SOLD out');
-    }else{
-        final creditBalance = getCreditBalance(selectedItems, moneyAvailable);
-        if(creditBalance < selectedItem.price){
-          print('Item $slot | ${selectedItem.name} | price exceeds remaning money balance: $creditBalance');
-        }else{
-          selectedItems.update(selectedItem, (qty) => qty + 1, ifAbsent: () => 1);
-        }
-        
+    } else {
+      final creditBalance = getCreditBalance(selectedItems, moneyAvailable);
+      if (creditBalance < selectedItem.price) {
+        print('Item $slot | ${selectedItem.name} | price exceeds remaning money balance: $creditBalance');
+      } else {
+        selectedItems.update(selectedItem, (qty) => qty + 1, ifAbsent: () => 1);
+      }
     }
   }
 }
 
-double getCreditBalance(Map<Item, int> selectedItems, double moneyAvailable){
+double getCreditBalance(Map<Item, int> selectedItems, double moneyAvailable) {
   double cost = 0;
   selectedItems.forEach((item, quantity) {
     cost += (item.price * quantity);
   });
   return moneyAvailable - cost;
 }
-
-
 
 Item getItemFromString(String dataString) {
   List<String> itemData = dataString.split('|');
@@ -219,7 +242,6 @@ Please choose from the following menu options:
 User Input: ''';
 
 const finishMenuMessage = '''
-
 
 Please choose from the following menu options:
    (1) Finish

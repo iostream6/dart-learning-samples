@@ -9,7 +9,7 @@ abstract class DataSource<T> {
 
   T update(T item);
 
-  bool delete(var id);
+  T delete(var id);
 }
 
 class MemoryMapItemDataSource implements DataSource<Item> {
@@ -28,15 +28,13 @@ class MemoryMapItemDataSource implements DataSource<Item> {
   }
 
   @override
-  bool delete(id) {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Item delete(id) {
+    return map.remove(id);
   }
 
   @override
   Item read(id) {
-    // TODO: implement read
-    throw UnimplementedError();
+    return map[id];
   }
 
   @override
@@ -46,7 +44,7 @@ class MemoryMapItemDataSource implements DataSource<Item> {
 
   @override
   Item update(Item item) {
-    // TODO: implement update
-    throw UnimplementedError();
+    map[item.id] = item;
+    return item;
   }
 }
