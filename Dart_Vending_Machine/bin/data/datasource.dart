@@ -1,3 +1,10 @@
+/**
+ * Author: Ilamah, Osho
+ * 
+ * 2020.11.29  - Created
+ * 2020.12.02  - Basic functionality completed
+ */
+
 import '../models/models.dart';
 import 'package:uuid/uuid.dart';
 
