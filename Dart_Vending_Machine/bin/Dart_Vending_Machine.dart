@@ -1,53 +1,61 @@
+/**
+ * Author: Ilamah, Osho
+ * 
+ * 2020.11.29  - Created
+ * 2020.12.02  - Basic functionality completed | Added support for command line args
+ * 2020.12.04  - Improved command line support implementation, including use of defaults
+ */
+
 import 'models/models.dart';
 import 'data/datasource.dart';
 
 import 'dart:io';
-//import 'package:args/args.dart';
+import 'package:args/args.dart';
 
-//ArgResults args;
+ArgResults args;
 
 DataSource<Item> itemDataSource;
 
 void main(List<String> arguments) {
-  ////deal with the command line args
-  //final ArgParser cliParser = new ArgParser();
-  ////register the expected command line options: file
-  //cliParser.addOption('file',
-  //    abbr: 'f'); // the option to specify the data file URI
-  ////register expected command line flags
-  //cliParser.addFlag('report',
-  //    abbr:
-  //        'r'); //report flag to specify whether to prepare transaction reports or not
+  //deal with the command line args ||  --file=filename --report | --file filename --report | -f=filename -r | -f filename -r | can also use --no-report
+  final ArgParser cliParser = new ArgParser()
+    ..addOption('file', abbr: 'f', help: 'The input data file', defaultsTo: 'Dart_Vending_Machine.csv')
+    ..addFlag('report', abbr: 'r', help: 'Save transaction reports', defaultsTo: false);
 
-  //args = cliParser.parse(arguments);
+  args = cliParser.parse(arguments);
 
-  //print(args['file']);
+  print(args['file']);
+
+  print(args['report']);
+
+  print('');
+
+  print(cliParser.usage);
+
+  final dataFile = new File(args['file']);
+
+  List<String> data;
+
+  // myFile.readAsLines().then((data) {
+  //   startMachine(data);
+  // }, onError: (error) {
+  //   print('${error.toString()}');
+  // });
+
+  try {
+    data = dataFile.readAsLinesSync();
+  } on FileSystemException catch (e) {
+    print('Exception in file read:\n${e.toString()}');
+    return;
+  }
 
   itemDataSource = new MemoryMapItemDataSource();
-  //create memorymap item inventory
-  List<String> data = [
-    'A1|Potato Crisps|3.05|Chip',
-    'A2|Stackers|1.45|Chip',
-    'A3|Grain Waves|2.75|Chip',
-    'A4|Cloud Popcorn|3.65|Chip',
-    'B1|Moonpie|1.80|Candy',
-    'B2|Cowtales|1.50|Candy',
-    'B3|Wonka Bar|1.50|Candy',
-    'B4|Crunchie|1.75|Candy',
-    'C1|Cola|1.25|Drink',
-    'C2|Dr. Salt|1.50|Drink',
-    'C3|Mountain Melter|1.50|Drink',
-    'C4|Heavy|1.50|Drink',
-    'D1|U-Chews|0.85|Gum',
-    'D2|Little League Chew|0.95|Gum',
-    'D3|Chiclets|0.75|Gum',
-    'D4|Triplemint|0.75|Gum'
-  ];
   data.map(getItemFromString).forEach((item) {
     item.inventoryQuantity = 5; //max per slot
     itemDataSource.add(item);
     //print(item);
   });
+
   print('******************************************************************');
   print('***************** Vendo-Matic 800 Vending Machine ****************');
   print('******************************************************************');
