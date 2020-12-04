@@ -17,3 +17,4 @@ analyzer:
   errors:
     omit_local_variable_types: ignore
     unnecessary_new: ignore
+    slash_for_doc_comments: ignore
