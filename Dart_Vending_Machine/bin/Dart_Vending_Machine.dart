@@ -3,7 +3,7 @@
  * 
  * 2020.11.29  - Created
  * 2020.12.02  - Basic functionality completed | Added support for command line args
- * 2020.12.04  - Improved command line support implementation, including use of defaults
+ * 2020.12.04  - Improved command line support implementation, including use of defaults and Console library enhancements
  */
 
 import 'models/models.dart';
@@ -11,10 +11,13 @@ import 'data/datasource.dart';
 
 import 'dart:io';
 import 'package:args/args.dart';
+import 'package:dart_console/dart_console.dart'; //https://github.com/timsneath/dart_console  https://pub.dev/packages/dart_console
 
 ArgResults args;
 
 DataSource<Item> itemDataSource;
+
+final console = Console();
 
 void main(List<String> arguments) {
   //deal with the command line args ||  --file=filename --report | --file filename --report | -f=filename -r | -f filename -r | can also use --no-report
@@ -23,14 +26,7 @@ void main(List<String> arguments) {
     ..addFlag('report', abbr: 'r', help: 'Save transaction reports', defaultsTo: false);
 
   args = cliParser.parse(arguments);
-
-  print(args['file']);
-
-  print(args['report']);
-
-  print('');
-
-  print(cliParser.usage);
+  //print(cliParser.usage);
 
   final dataFile = new File(args['file']);
 
@@ -56,71 +52,85 @@ void main(List<String> arguments) {
     //print(item);
   });
 
-  print('******************************************************************');
-  print('***************** Vendo-Matic 800 Vending Machine ****************');
-  print('******************************************************************');
-  print('******************************************************************\n');
-  int showMainMenuOption = 0;
-  double moneyAvailable = 0;
-  Map<Item, int> selectedItems = {};
+  while (true) {
+    //dart_console library appears to hang for CNTR+Q and ESC. So rolling my own with easier strings
+    print('\n\n\nPress ENTER to start.\n');
+    String action = stdin.readLineSync().toUpperCase();
 
-  while (showMainMenuOption != 3) {
-    showMainMenuOption = showMenu(mainMenuMessage);
-    switch (showMainMenuOption) {
-      case 1: //display vending machine items
-        print('\n%%%%%%% Vending Machine Inventory::');
-        itemDataSource.readAll().forEach((item) {
-          print(item);
-        });
-        print('\n');
-        break;
-      case 2: //purchase items
-        //print('\n%%%%%%% Vending Machine Purchase::');
-        int showPurchaseMenuOption = 0;
-        while (showPurchaseMenuOption != 3) {
-          showPurchaseMenuOption = showMenu(purchaseMenuMessage);
-          print('\nCurrent money provided: $moneyAvailable\n');
-          switch (showPurchaseMenuOption) {
-            case 1:
-              //feed money in
-              moneyAvailable += addMoney();
-              break;
-            case 2:
-              //select product
-              selectProduct(selectedItems, moneyAvailable);
-              break;
-            case 3:
-              //finalize transaction
-              if (selectedItems.isNotEmpty) {
-                print('\n%%%%%%% Vending Machine <Selected Items> ::');
-                selectedItems.forEach((key, value) {
-                  print('x$value | $key ');
-                });
+    if (action == 'QUIT') {
+      break;
+    } else {
+      console.clearScreen();
+      console.setForegroundColor(ConsoleColor.brightYellow);
+      print('******************************************************************');
+      print('***************** Vendo-Matic 800 Vending Machine ****************');
+      print('***************** Vendo-Matic 800 Vending Machine ****************');
+      print('******************************************************************');
+      print('******************************************************************\n');
+      console.resetColorAttributes();
+      int showMainMenuOption = 0;
+      double moneyAvailable = 0;
+      Map<Item, int> selectedItems = {};
+
+      while (showMainMenuOption != 3) {
+        showMainMenuOption = showMenu(mainMenuMessage);
+        switch (showMainMenuOption) {
+          case 1: //display vending machine items
+            print('\n%%%%%%% Vending Machine Inventory::');
+            itemDataSource.readAll().forEach((item) {
+              print(item);
+            });
+            print('\n');
+            break;
+          case 2: //purchase items
+            //print('\n%%%%%%% Vending Machine Purchase::');
+            int showPurchaseMenuOption = 0;
+            while (showPurchaseMenuOption != 3) {
+              showPurchaseMenuOption = showMenu(purchaseMenuMessage);
+              print('\nCurrent money provided: $moneyAvailable\n');
+              switch (showPurchaseMenuOption) {
+                case 1:
+                  //feed money in
+                  moneyAvailable += addMoney();
+                  break;
+                case 2:
+                  //select product
+                  selectProduct(selectedItems, moneyAvailable);
+                  break;
+                case 3:
+                  //finalize transaction
+                  if (selectedItems.isNotEmpty) {
+                    print('\n%%%%%%% Vending Machine <Selected Items> ::');
+                    selectedItems.forEach((key, value) {
+                      print('x$value | $key ');
+                    });
+                  }
+                  int showFinalizeMenuOption = showMenu(finishMenuMessage);
+                  if (showFinalizeMenuOption == 3) {
+                    //continue option
+                    print('\n');
+                  } else {
+                    if (showFinalizeMenuOption == 2) {
+                      //cancel transaction
+                      selectedItems.clear();
+                    }
+                    //finish/cancel the transaction
+                    finishTransaction(selectedItems, moneyAvailable);
+                    moneyAvailable = 0;
+                    selectedItems.clear();
+                    showPurchaseMenuOption = 3;
+                    showMainMenuOption = 3;
+                  }
               }
-              int showFinalizeMenuOption = showMenu(finishMenuMessage);
-              if (showFinalizeMenuOption == 3) {
-                //continue option
-                print('\n');
-              } else {
-                if (showFinalizeMenuOption == 2) {
-                  //cancel transaction
-                  selectedItems.clear();
-                }
-                //finish/cancel the transaction
-                finishTransaction(selectedItems, moneyAvailable);
-                moneyAvailable = 0;
-                selectedItems.clear();
-                showPurchaseMenuOption = 3;
-                showMainMenuOption = 3;
-              }
-          }
+            }
+            break;
+          case 3: //exit
+            if (selectedItems.isNotEmpty || moneyAvailable > 0) {
+              print('\n\nPlease use the Purchase menu option to finish or cancel your transaction\n\n');
+              showMainMenuOption = 0;
+            }
         }
-        break;
-      case 3: //exit
-        if (selectedItems.isNotEmpty || moneyAvailable > 0) {
-          print('\n\nPlease use the Purchase menu option to finish or cancel your transaction\n\n');
-          showMainMenuOption = 0;
-        }
+      }
     }
   }
 }
@@ -172,7 +182,7 @@ void finishTransaction(Map<Item, int> selectedItems, double moneyAvailable) {
       final item = itemDataSource.read(key.id);
       if (item != null) {
         item.inventoryQuantity = item.inventoryQuantity - qty;
-        print(' {$qty}x ${item.name}!');
+        print(' x$qty ${item.name}!');
       }
     });
     hasItems = 4;
@@ -211,6 +221,8 @@ void selectProduct(Map<Item, int> selectedItems, double moneyAvailable) {
         selectedItems.update(selectedItem, (qty) => qty + 1, ifAbsent: () => 1);
       }
     }
+  } else {
+    print('Item $slot does not exist!');
   }
 }
 
@@ -257,18 +269,6 @@ Please choose from the following menu options:
    (3) Continue
 User Input: ''';
 
-// // readline.dart
-// //
-// // Demonstrates a simple command-line interface that does not require line
-// // editing services from the shell.
-
-// import 'dart:io';
-
-// import 'package:dart_console/dart_console.dart'; //https://github.com/timsneath/dart_console  https://pub.dev/packages/dart_console
-
-// final console = Console();
-
-// const prompt = '>>> ';
 
 // // Inspired by
 // // http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html#writing-a-command-line
