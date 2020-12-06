@@ -1,6 +1,8 @@
-## Tech Elevator Capstone Module 1 - Vending Machine Software (Dart Command Line Version)
+## Capstone Module 1 - Vending Machine Software (Dart Command Line Version)
 
-You've been asked to develop an application for the newest vending machine distributor, 
+This program is based on the Tech Elevator Capstone Module 1. This version is written in Dart programming language.
+
+The task  is to develop an application for the newest vending machine distributor, 
 Umbrella Corp. They've released a new vending machine, Vendo-Matic 800, that is integrated 
 with everyone's bank accounts, allowing customers to purchase products from their computers for their convenience. 
 
