@@ -4,4 +4,4 @@
 
 ## 1.0.1
 
-- Basic functionaly excluding reporting 
+- Basic functionality excluding reporting 
