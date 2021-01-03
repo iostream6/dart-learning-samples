@@ -1,12 +1,12 @@
 /*
  * 2021.01.02  - Created
- * 2021.01.03  - Added async initialization method and made all other methods synchronous
+ * 2021.01.03  - Added async initialization method and made all other methods synchronous.
+ *               Removed hasAccount methods - not needed, replaced with getEmail
  */
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:meta/meta.dart';
 
-const String HAS_ACCOUNT_KEY = 'HAS_ACCOUNT';
 const String FULLNAME_KEY = 'fullname';
 const String PASSWORD_KEY = 'password';
 const String EMAIL_KEY = 'email';
@@ -17,8 +17,8 @@ Future<bool> init() async {
   return true;
 }
 
-bool hasAccount() {
-  return _sharedPrefs == null ? false : _sharedPrefs.getBool(HAS_ACCOUNT_KEY) ?? false;
+String getEmail() {
+  return _sharedPrefs?.getString(EMAIL_KEY);
 }
 
 bool createAccount(String fullname, String email, String password) {
@@ -28,19 +28,14 @@ bool createAccount(String fullname, String email, String password) {
   _sharedPrefs.setString(FULLNAME_KEY, fullname);
   _sharedPrefs.setString(EMAIL_KEY, email);
   _sharedPrefs.setString(PASSWORD_KEY, password); //plain text, TODO hash?
-  _sharedPrefs.setBool(HAS_ACCOUNT_KEY, true);
   return true;
 }
 
-bool authenticate({@required String currentPassword, String newPassword}) {
-  if (_sharedPrefs == null) {
+bool authenticate({@required String email, @required String currentPassword, String newPassword}) {
+  if (_sharedPrefs == null || _sharedPrefs.getString(EMAIL_KEY) == null) {
     return false;
   }
-  final bool hasAccount = _sharedPrefs.getBool(HAS_ACCOUNT_KEY) ?? false;
-  if (!hasAccount) {
-    return false;
-  }
-  final bool authenticated = currentPassword == _sharedPrefs.getString(PASSWORD_KEY);
+  final bool authenticated = currentPassword == _sharedPrefs.getString(PASSWORD_KEY) && email == _sharedPrefs.getString(EMAIL_KEY) ;
   if (authenticated && newPassword != null) {
     //change the password if required
     _sharedPrefs.setString(PASSWORD_KEY, newPassword); //plain text, TODO hash?
