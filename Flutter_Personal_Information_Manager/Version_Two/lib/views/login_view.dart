@@ -6,7 +6,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'secured/home_view.dart';
+import 'secured/secured_views.dart';
 import '../services/services.dart' as service;
 
 final String logo = "assets/images/logo.png";
@@ -75,7 +75,7 @@ class _LoginViewState extends State<LoginView> {
           if (_formKey.currentState.validate()) {
             if (service.authenticate(email: _emailTextController.text, currentPassword: _passwordTextController.text)) {
               //account authenticated!
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomeView()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => SecuredPageView()));
             } else {
               setState(() => _errorMessage = 'Login failed. Please check your login details.');
             }
@@ -237,7 +237,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
           if (_formKey.currentState.validate()) {
             if (service.createAccount(_fullnameTextController.text, _emailTextController.text, _passwordTextController.text)) {
               //account created!
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomeView()));
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => SecuredPageView()));
             } else {
               setState(() => _errorMessage = 'Create account failed');
             }
