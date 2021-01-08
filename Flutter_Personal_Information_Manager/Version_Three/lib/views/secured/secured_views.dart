@@ -4,6 +4,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'notes_list_view.dart';
 //import '../login_view.dart';
 
 class SecuredPageView extends StatefulWidget {
@@ -39,7 +40,7 @@ class _SecuredPageViewState extends State<SecuredPageView> {
           onPageChanged: (int index) => setState(() => _selectedViewIndex = index),
           pageSnapping: true,
           scrollDirection: Axis.horizontal,
-          children: <Widget>[_getContactsListWidget(), _getNotesListWidget(), _getXXXListWidget()],
+          children: <Widget>[NotesGridPage(ViewType.Staggered), _getContactsListWidget(), _getXXXListWidget()],
         ),
       ),
       bottomNavigationBar: _bottomNavBar(),
@@ -51,20 +52,20 @@ class _SecuredPageViewState extends State<SecuredPageView> {
         color: Colors.pink,
         child: Center(
             child: Text(
-          'This is Widget 1',
+          'This is Widget 2',
           style: TextStyle(fontSize: 25, color: Colors.black),
         )));
   }
 
-  Widget _getNotesListWidget() {
-    return Container(
-        color: Colors.grey,
-        child: Center(
-            child: Text(
-          'This is Widget 2',
-          style: TextStyle(fontSize: 25, color: Colors.white),
-        )));
-  }
+  // Widget _getNotesListWidget() {
+  //   return Container(
+  //       color: Colors.grey,
+  //       child: Center(
+  //           child: Text(
+  //         'This is Widget 2',
+  //         style: TextStyle(fontSize: 25, color: Colors.white),
+  //       )));
+  // }
 
   Widget _getXXXListWidget() {
     return Container(
@@ -80,16 +81,16 @@ class _SecuredPageViewState extends State<SecuredPageView> {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
+          icon: Icon(Icons.article),
+          label: 'Notes',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Business',
+          icon: Icon(Icons.account_box),
+          label: 'Contacts',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.school),
-          label: 'School',
+          icon: Icon(Icons.today),
+          label: 'Tasks',
         )
       ],
       currentIndex: _selectedViewIndex,
