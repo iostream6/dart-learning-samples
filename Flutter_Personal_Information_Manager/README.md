@@ -9,5 +9,5 @@ In version 1, a basic flutter project project for ios/android is realized. This 
 
 ## Version Two
 
-In version 2, Login and Signup UI are updated, dropping use of deprecated Widgets and methods/properties. Added form validation support and error notification for login/signup forms. Authentication implementation is now included based on a local (SharedPreference) persistence backend service.
+In version 2, Login and Signup UI are updated, dropping use of deprecated Widgets and methods/properties. Added form validation support and error notification for login/signup forms. Authentication implementation is now included based on a local (SharedPreference) persistence backend service. Basic skeleton of authenticated (i.e. secured) view implemented with PageView widget and BottomNavBar
 
