@@ -6,3 +6,8 @@ A flutter-based Personal Infomation Manager.
 
 In version 1, a basic flutter project project for ios/android is realized. This version includes basic UIs for login/signup and associated navigation. Actual authentication and input validation is not performed and there is no state management provided.
 
+
+## Version Two
+
+In version 2, Login and Signup UI are updated, dropping use of deprecated Widgets and methods/properties. Added form validation support and error notification for login/signup forms. Authentication implementation is now included based on a local (SharedPreference) persistence backend service.
+
