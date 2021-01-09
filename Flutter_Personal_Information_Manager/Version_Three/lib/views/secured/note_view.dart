@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
-//import '../view_properties.dart';
+import '../view_properties.dart';
 import 'package:provider/provider.dart';
 import '../../services/sqldb_service.dart' as dao;
 
@@ -26,19 +26,19 @@ class _NoteViewState extends State<NoteView> {
   final FocusNode _titleFocus = FocusNode();
   final FocusNode _bodyFocus = FocusNode();
   final GlobalKey<ScaffoldState> _globalKey = new GlobalKey<ScaffoldState>();
+  //Note _safeEditNote;
   //
-  String initialTitle;
-  String initialBody;
-
-  //dao.NotesChangeManager
+  Color _color;
+  //
+  bool _requiresSave = false;
 
   @override
   void initState() {
     super.initState();
+    //Note safeEditNote = Note.fromOther(widget._note);
     _titleController.text = widget._note.title;
     _contentController.text = widget._note.body;
-    initialTitle = widget._note.title;
-    initialBody = widget._note.body;
+    _color = Color(widget._note.color.value);
   }
 
   void dispose() {
@@ -51,9 +51,6 @@ class _NoteViewState extends State<NoteView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget._note.id == null && widget._note.title.isEmpty) {
-      FocusScope.of(context).requestFocus(_titleFocus);
-    }
     return WillPopScope(
       child: Scaffold(
         key: _globalKey,
@@ -64,41 +61,25 @@ class _NoteViewState extends State<NoteView> {
               ),
           actions: _appBarActions(context),
           //elevation: 1,
-          //backgroundColor: widget._note.color,
-          title: _viewTitle(),
+          //backgroundColor:_safeEditNote.color,
+          title: Text(widget._note.id == null ? 'New Note' : 'Edit Note'),
         ),
         body: _body(context),
       ),
-      onWillPop: _readyToPop,
+      onWillPop: () async => true,
     );
   }
 
-  Widget _viewTitle() => Text(widget._note.id == null ? 'New Note' : 'Edit Note');
-
   List<Widget> _appBarActions(BuildContext context) {
     List<Widget> actions = [];
-    if (widget._note.id != null) {
-      // actions.add(Padding(
-      //   padding: EdgeInsets.symmetric(horizontal: 5),
-      //   child: InkWell(
-      //     child: GestureDetector(
-      //       //!onTap: () => _undo(),
-      //       child: Icon(
-      //         Icons.undo,
-      //         color: ViewProperties.FONT_COLOR,
-      //       ),
-      //     ),
-      //   ),
-      // ));
-    }
     actions.add(Padding(
       padding: EdgeInsets.symmetric(horizontal: 5),
       child: InkWell(
         child: GestureDetector(
-          onTap: () => _saveNoteObject(context),
+          onTap: _requiresSave ? () => _saveNoteObject(context) : null,
           child: Icon(
             Icons.save,
-            //color: ViewProperties.FONT_COLOR,
+            color: _requiresSave ? Colors.white : ViewProperties.FONT_COLOR,
           ),
         ),
       ),
@@ -125,10 +106,10 @@ class _NoteViewState extends State<NoteView> {
               context: context,
               builder: (BuildContext ctx) {
                 return MoreNoteOptionsView(
-                  color: widget._note.color,
+                  color: _color,
                   colorTappedHandler: _changeColor,
                   optionTappedHandler: _moreOptionsTapHandler,
-                  edited: widget._note.edited,
+                  //edited: _safeEditNote.edited,
                 );
               }),
           child: Icon(
@@ -143,7 +124,7 @@ class _NoteViewState extends State<NoteView> {
       padding: EdgeInsets.symmetric(horizontal: 5),
       child: InkWell(
         child: GestureDetector(
-          //!onTap: () => {_saveAndStartNewNote(context)},
+          onTap: () => {_saveAndStartNewNote(context)},
           child: Icon(
             Icons.add,
             //color: ViewProperties.FONT_COLOR,
@@ -157,7 +138,7 @@ class _NoteViewState extends State<NoteView> {
 
   Widget _body(BuildContext ctx) {
     return Container(
-        color: widget._note.color,
+        decoration: BoxDecoration(border: Border.all(color: _color, width: 2) /*,borderRadius: BorderRadius.all(Radius.circular(10))*/),
         padding: EdgeInsets.only(left: 10, right: 10, top: 5),
         child: SafeArea(
           child: Column(
@@ -168,7 +149,7 @@ class _NoteViewState extends State<NoteView> {
                     padding: EdgeInsets.all(5),
                     ////decoration: BoxDecoration(border: Border.all(color: ViewProperties.BORDER_COLOR,width: 1 ),borderRadius: BorderRadius.all(Radius.circular(10)) ),
                     child: TextField(
-                      // onChanged: (str) => _updateNoteObject(ctx),
+                      onChanged: (str) => _setRequiresSave(),
                       maxLines: null, // line limit extendable later
                       controller: _titleController,
                       focusNode: _titleFocus,
@@ -181,7 +162,7 @@ class _NoteViewState extends State<NoteView> {
                   child: Container(
                       padding: EdgeInsets.all(5),
                       child: TextField(
-                        // onChanged: (str) => _updateNoteObject(ctx),
+                        onChanged: (str) => _setRequiresSave(),
                         keyboardType: TextInputType.multiline,
                         maxLines: null, // line limit extendable later
                         controller: _contentController,
@@ -199,89 +180,100 @@ class _NoteViewState extends State<NoteView> {
         ));
   }
 
-  Future<bool> _readyToPop() async {
-    //!_persistenceTimer.cancel();
-    //!_persistData();
-    return true;
+  void _changeColor(Color newColorSelected) {
+    setState(() {
+      _requiresSave = true;
+      _color = newColorSelected;
+    });
   }
 
-  void _changeColor(Color newColorSelected) {
-    //print("note color changed");
-    setState(() {
-      widget._note.color = newColorSelected;
-    });
-    //_persist();
+  void _saveAndStartNewNote(BuildContext context) {
+    _saveNoteObject(context);
+
+    Note newNote = Note(null, 'Title', 'Body', DateTime.now(), DateTime.now(), Colors.blue, false);
+    Navigator.of(context).pop();
+    Navigator.push(context, MaterialPageRoute(builder: (ctx) => NoteView(newNote)));
   }
 
   void _saveNoteObject(BuildContext ctx) {
     widget._note.body = _contentController.text;
     widget._note.title = _titleController.text;
+    widget._note.color = Color(_color.value);
 
-    if (!(widget._note.title == initialTitle && widget._note.body == initialBody) || (widget._note.id == null)) {
-      // Change last edit time only if the title/body of the note is mutated wrt the note which the page was initialized with.
-      widget._note.edited = DateTime.now();
-      //! CentralStation.updateNeeded = true;
-    }
-    dao.NotesChangeManager ncm = Provider.of<dao.NotesChangeManager>(ctx, listen: false); //.insertNote(widget._note);
+    widget._note.edited = DateTime.now();
+
+    dao.NotesChangeManager ncm = Provider.of<dao.NotesChangeManager>(ctx, listen: false);
     if (widget._note.id != null) {
       ncm.updateNote(widget._note);
     } else {
       ncm.insertNote(widget._note);
     }
+
+    setState(() => _requiresSave = false);
+  }
+
+  void _setRequiresSave() {
+    setState(() => _requiresSave = true);
   }
 
   void _moreOptionsTapHandler(MoreOptions tappedOption) {
     switch (tappedOption) {
       case MoreOptions.DELETE:
+        if (widget._note.id != null) {
+          _deleteNote(_globalKey.currentContext);
+        } else {
+          _exitWithoutSaving(context);
+        }
         break;
       case MoreOptions.SHARE:
+        // if (_editableNote.content.isNotEmpty) {
+        //     Share.share("${_editableNote.title}\n${_editableNote.content}"); //requires share package
+        //   }
         break;
       case MoreOptions.COPY:
+        //_copy();
+        break;
     }
   }
 
-  // void _exitWithoutSaving(BuildContext context) {
-  //   //!_persistenceTimer.cancel();
-  //   Navigator.of(context).pop();
-  // }
+  void _exitWithoutSaving(BuildContext context) {
+    //!_persistenceTimer.cancel();
+    Navigator.of(context).pop();
+  }
 
-  // void _deleteNote(BuildContext context) {
-  //   if (widget._note.id != null) {
-  //     showDialog(
-  //         context: context,
-  //         builder: (BuildContext context) {
-  //           return AlertDialog(
-  //             title: Text("Confirm ?"),
-  //             content: Text("This note will be deleted permanently"),
-  //             actions: <Widget>[
-  //               FlatButton(
-  //                   onPressed: () {
-  //                     //!_persistenceTimer.cancel();
-  //                     var noteDB = NotesDBHandler();
-  //                     Navigator.of(context).pop();
-  //                     noteDB.deleteNote(_editableNote);
-  //                     CentralStation.updateNeeded = true;
-
-  //                     Navigator.of(context).pop();
-  //                   },
-  //                   child: Text("Yes")),
-  //               FlatButton(onPressed: () => {Navigator.of(context).pop()}, child: Text("No"))
-  //             ],
-  //           );
-  //         });
-  //   }
-  // }
+  void _deleteNote(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("Confirm ?"),
+            content: Text("This note will be deleted permanently"),
+            actions: <Widget>[
+              FlatButton(
+                  onPressed: () {
+                    //!_persistenceTimer.cancel();
+                    dao.NotesChangeManager ncm = Provider.of<dao.NotesChangeManager>(context, listen: false);
+                    Navigator.of(context).pop();
+                    ncm.deleteNote(widget._note);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Yes")),
+              FlatButton(onPressed: () => {Navigator.of(context).pop()}, child: Text("No"))
+            ],
+          );
+        });
+  }
 }
 
 enum MoreOptions { DELETE, SHARE, COPY }
 
 class MoreNoteOptionsView extends StatefulWidget {
   final Color color;
-  final DateTime edited;
+  //final DateTime edited;
   final void Function(MoreOptions) optionTappedHandler;
   final void Function(Color) colorTappedHandler;
 
-  MoreNoteOptionsView({Key key, this.color, this.edited, this.colorTappedHandler, this.optionTappedHandler}) : super(key: key);
+  MoreNoteOptionsView({Key key, this.color, /*this.edited,*/ this.colorTappedHandler, this.optionTappedHandler}) : super(key: key);
   @override
   _MoreNoteOptionsViewState createState() => _MoreNoteOptionsViewState();
 }
@@ -369,7 +361,7 @@ class ColorSlider extends StatefulWidget {
 
 class _ColorSliderState extends State<ColorSlider> {
   final colors = [
-    Color(0xffffffff), // classic white
+    Colors.blue, // classic blue
     Color(0xfff28b81), // light pink
     Color(0xfff7bd02), // yellow
     Color(0xfffbf476), // light yellow
