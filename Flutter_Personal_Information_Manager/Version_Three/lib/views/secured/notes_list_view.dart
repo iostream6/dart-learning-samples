@@ -6,6 +6,8 @@
 //Some ideas from https://medium.com/aubergine-solutions/creating-a-note-taking-app-in-flutter-dart-f50852993cd0
 
 import '../../models/models.dart';
+import '../view_properties.dart';
+import 'note_view.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -26,8 +28,6 @@ class NotesGridPage extends StatefulWidget {
 class _NotesGridPageState extends State<NotesGridPage> {
   @override
   Widget build(BuildContext context) {
-    //return Container();
-
     GlobalKey _stagKey = GlobalKey();
     return Container(
       child: Padding(
@@ -74,8 +74,7 @@ class NotesGridPageTile extends StatefulWidget {
 }
 
 class _NotesGridPageCellState extends State<NotesGridPageTile> {
-  double _fontSize;
-  static const BORDER_COLOR = Color(0xffd3d3d3);
+  double _fontSize; 
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +82,7 @@ class _NotesGridPageCellState extends State<NotesGridPageTile> {
     return GestureDetector(
       onTap: () => _cellTapped(context),
       child: Container(
-        decoration: BoxDecoration(border: widget._note.color == Colors.white ? Border.all(color: BORDER_COLOR) : null, color: widget._note.color, borderRadius: BorderRadius.all(Radius.circular(8))),
+        decoration: BoxDecoration(border: widget._note.color == Colors.white ? Border.all(color: ViewProperties.BORDER_COLOR) : null, color: widget._note.color, borderRadius: BorderRadius.all(Radius.circular(8))),
         padding: EdgeInsets.all(8),
         child: _constructChildren(),
       ),
@@ -91,8 +90,7 @@ class _NotesGridPageCellState extends State<NotesGridPageTile> {
   }
 
   void _cellTapped(BuildContext ctx) {
-    //CentralStation.updateNeeded = false;
-    //Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => NotePage(widget.note)));
+    Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => NoteView(widget._note)));
   }
 
   Widget _constructChildren() {

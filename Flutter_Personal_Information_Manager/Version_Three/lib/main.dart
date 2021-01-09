@@ -8,6 +8,7 @@ import 'views/login_view.dart';
 import 'services/services.dart' as services;
 import 'services/sqldb_service.dart' as dao;
 import 'package:provider/provider.dart';
+//import 'models/models.dart';
 
 // void main() => runApp(FlutterPIMApp());
 
@@ -17,18 +18,16 @@ void main() async {
   await services.init();
   await dao.getDatabase();
 
-  // Note n =
-  //     Note(null, 'Title', 'Body text', DateTime.now(), DateTime.now(), Colors.blue, false);
+  // Note n = Note(null, 'Title', 'Body text', DateTime.now(), DateTime.now(), Colors.blue, false);
   // dao.insert(n, dao.NOTES_TABLE_NAME);
-  // n =
-  //     Note(null, 'Title2', 'Body text2', DateTime.now(), DateTime.now(), Colors.blue, false);
+  // n =  Note(null, 'Title2', 'Body text2', DateTime.now(), DateTime.now(), Colors.blue, false);
   // dao.insert(n, dao.NOTES_TABLE_NAME);
   // List<Map<String, dynamic>> res = await dao.select(dao.NOTES_TABLE_NAME);
   // res.forEach((t) async {
   //   print('Map Result \t ${t.toString()}');
-  //   Note resNote = Note.fromBLOB(t);
-  //   print('OBJ Result:: \t ${resNote.asString()}');
-  //   await dao.delete(resNote, dao.NOTES_TABLE_NAME);
+  //   //Note resNote = Note.fromBLOB(t);
+  //   //print('OBJ Result:: \t ${resNote.asString()}');
+  //   //await dao.delete(resNote, dao.NOTES_TABLE_NAME);
   // });
 
   dao.NotesChangeManager ncm = dao.NotesChangeManager();

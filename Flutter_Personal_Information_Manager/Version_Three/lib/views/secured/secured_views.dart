@@ -1,10 +1,12 @@
 /*
  * 2021.01.03  - Created
- * 
+ * 2021.01.09  - Added add() action support to allow adding objects(Notes)
  */
 
 import 'package:flutter/material.dart';
 import 'notes_list_view.dart';
+import 'note_view.dart';
+import '../../models/models.dart';
 //import '../login_view.dart';
 
 class SecuredPageView extends StatefulWidget {
@@ -32,6 +34,7 @@ class _SecuredPageViewState extends State<SecuredPageView> {
     return Scaffold(
       appBar: AppBar(
         title: Text("FlutterPIM"),
+        actions: _appBarActions(context),
       ),
       body: Container(
         padding: EdgeInsets.all(5.0),
@@ -56,16 +59,6 @@ class _SecuredPageViewState extends State<SecuredPageView> {
           style: TextStyle(fontSize: 25, color: Colors.black),
         )));
   }
-
-  // Widget _getNotesListWidget() {
-  //   return Container(
-  //       color: Colors.grey,
-  //       child: Center(
-  //           child: Text(
-  //         'This is Widget 2',
-  //         style: TextStyle(fontSize: 25, color: Colors.white),
-  //       )));
-  // }
 
   Widget _getXXXListWidget() {
     return Container(
@@ -101,5 +94,35 @@ class _SecuredPageViewState extends State<SecuredPageView> {
         });
       },
     );
+  }
+
+  List<Widget> _appBarActions(BuildContext context) {
+    List<Widget> actions = [];
+    actions.add(Padding(
+      padding: EdgeInsets.symmetric(horizontal: 5),
+      child: InkWell(
+        child: GestureDetector(
+          onTap: () => _addObjectHandler(context),
+          child: Icon(
+            Icons.add,
+            //color: ViewProperties.FONT_COLOR,
+          ),
+        ),
+      ),
+    ));
+    return actions;
+  }
+
+  void _addObjectHandler(BuildContext ctx) {
+    switch (_selectedViewIndex) {
+      case 0:
+        Note newNote = Note(null, 'Title', 'Body', DateTime.now(), DateTime.now(), Colors.blue, false);
+        Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => NoteView(newNote)));
+        break;
+      case 1:
+        break;
+      case 2:
+        break;
+    }
   }
 }
