@@ -1,6 +1,6 @@
 /*
  * 2021.01.08  - Created
- * 
+ * 2021.01.09  - Added record update() support 
  */
 import '../models/models.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -58,6 +58,10 @@ Future<int> insert(Transformable t, String tableName) async {
   return t.id;
 }
 
+Future<int> update(Transformable t, String tableName) async {
+  return await _database.update(tableName, t.asMap(), where: 'id = ?', whereArgs: [t.id]);
+}
+
 Future<List<Map<String, dynamic>>> select(String tableName, {String orderByString, String whereString, List<dynamic> whereArgs}) async {
   var data = await _database.query(tableName, orderBy: orderByString, where: whereString, whereArgs: whereArgs);
   return data;
@@ -80,7 +84,7 @@ class NotesChangeManager with ChangeNotifier {
   void init() async {
     select(NOTES_TABLE_NAME, orderByString: 'edited desc', whereString: 'archived = ?', whereArgs: [0]).then((List<Map<String, dynamic>> res) {
       notes = res.map((e) => Note.fromBLOB(e)).toList();
-      _sendChangeNotification();
+      sendChangeNotification();
     });
   }
 
@@ -88,7 +92,15 @@ class NotesChangeManager with ChangeNotifier {
     insert(note, NOTES_TABLE_NAME).then((int id) {
       if (id > 0) {
         notes.add(note);
-        _sendChangeNotification();
+        sendChangeNotification();
+      }
+    });
+  }
+
+  void updateNote(Note note) {
+    update(note, NOTES_TABLE_NAME).then((int count) {
+      if (count > 0) {
+        sendChangeNotification();
       }
     });
   }
@@ -97,12 +109,12 @@ class NotesChangeManager with ChangeNotifier {
     delete(note, NOTES_TABLE_NAME).then((bool success) {
       if (success) {
         notes.removeWhere((element) => element.id == note.id);
-        _sendChangeNotification();
+        sendChangeNotification();
       }
     });
   }
 
-  void _sendChangeNotification() {
+  void sendChangeNotification() {
     notifyListeners();
   }
 }
