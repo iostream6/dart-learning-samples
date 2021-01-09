@@ -1,6 +1,6 @@
 /*
  * 2021.01.08  - Created
- * 
+ * 2021.01.09  - Added Note.fromOther() named constructor
  */
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -37,6 +37,15 @@ class Note extends Transformable with ChangeNotifier {
   Note.fromBLOB(Map<String, dynamic> dbMap)
       : this(dbMap['id'], utf8.decode(dbMap['title']), utf8.decode(dbMap['body']), DateTime.fromMillisecondsSinceEpoch(1000 * dbMap['created']),
             DateTime.fromMillisecondsSinceEpoch(1000 * dbMap['edited']), Color(dbMap['color']), dbMap['archived'] == 1);
+
+  Note.fromOther(Note other) : super._(other.id) {
+    this.title = other.title;
+    this.body = other.body;
+    this.created = DateTime.fromMillisecondsSinceEpoch(other.created.millisecondsSinceEpoch);
+    this.edited = DateTime.fromMillisecondsSinceEpoch(other.edited.millisecondsSinceEpoch);
+    this.color = Color(other.color.value);
+    this.archived = (other.archived == true);
+  }
 
   /// Provides a [Map] represention of the note.
   @override
