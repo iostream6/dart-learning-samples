@@ -1,6 +1,7 @@
 /*
  * 2021.01.08  - Created
  * 2021.01.09  - Added Note.fromOther() named constructor
+ * 2021.01.18  - Added Contact model class
  */
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -15,9 +16,64 @@ abstract class Transformable {
   Transformable._(this.id);
 }
 
-class NoteChangeManager with ChangeNotifier {
-  void sendChangeNotification() {
-    notifyListeners();
+class Contact extends Transformable {
+  String firstname, lastname, email;
+  List<ContactNumber> numbers;
+
+  Contact(id, this.firstname, this.lastname, this.email, this.numbers) : super._(id);
+
+  static Contact fromMap(Map<String, dynamic> dbMap) {
+    Contact _nc = Contact(dbMap['id'], dbMap['firstname'], dbMap['lastname'], dbMap['email'], null);
+    _nc.numbers = [];
+    List _numbers = dbMap['numbers']; //TODO _TypeError (type 'String' is not a subtype of type 'List<dynamic>')
+
+    _numbers.forEach((contactNumberMap) {
+      ContactNumber _cnc = ContactNumber.fromMap(contactNumberMap);
+      _nc.numbers.add(_cnc);
+    });
+    return _nc;
+  }
+
+  @override
+  Map<String, dynamic> asMap() {
+    Map<String, dynamic> map = {
+      'firstname': firstname,
+      'lastname': lastname,
+      'email': email,
+      'numbers': numbers.toString(),
+    };
+    if (id != null) {
+      map['id'] = id;
+    }
+    return map;
+  }
+
+  @override
+  String asString() {
+    return {'id': id, 'firstname': firstname, 'lastname': lastname, 'email': email, 'numbers': numbers}.toString();
+  }
+}
+
+class ContactNumber {
+  String number;
+  int priority;
+  int cid;
+
+  ContactNumber(this.number, this.priority, this.cid);
+
+  ContactNumber.fromMap(Map<String, dynamic> dbMap) : this(dbMap['number'], dbMap['priority'], dbMap['cid']);
+
+  Map<String, dynamic> asMap() {
+    var map = {'number': number, 'priority': priority};
+    if (cid != null) {
+      map['cid'] = cid;
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return asMap().toString();
   }
 }
 
