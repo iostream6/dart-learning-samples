@@ -8,7 +8,7 @@ import 'views/login_view.dart';
 import 'services/services.dart' as services;
 import 'services/sqldb_service.dart' as dao;
 import 'package:provider/provider.dart';
-//import 'models/models.dart';
+import 'models/models.dart';
 
 // void main() => runApp(FlutterPIMApp());
 
@@ -30,8 +30,24 @@ void main() async {
   //   //await dao.delete(resNote, dao.NOTES_TABLE_NAME);
   // });
 
-  dao.NotesChangeManager ncm = dao.NotesChangeManager();
+  dao.EntityChangeManager<Note> ncm = dao.EntityChangeManager<Note>(dao.NOTES_TABLE_NAME, 'edited desc', 'archived = ?', [0], (e) => Note.fromBLOB(e));
   ncm.init();
+
+  dao.EntityChangeManager<Contact> ccm = dao.EntityChangeManager<Contact>(dao.CONTACTS_TABLE_NAME, 'firstname desc', null, null, (e) => Contact.fromMap(e));
+  ccm.init();
+
+  // Contact c = Contact(0, 'Osho', 'Ilamah', 'oilamah@wonders.com', [ContactNumber('052222246', 0, 0), ContactNumber('0846667121', 1, 1)]);
+  // ccm.insertEntity(c);
+  // c = Contact(0, 'Florence', 'Ilamah', 'feilamah@xxxs.com', [ContactNumber('052222246', 0, 0), ContactNumber('0803888887', 1, 1)]);
+  // ccm.insertEntity(c);
+
+  List<Map<String, dynamic>> res = await dao.select(dao.CONTACTS_TABLE_NAME);
+  res.forEach((element) {
+    Contact c = Contact.fromMap(element);
+    print('trying');
+  });
+
+
   runApp(ChangeNotifierProvider(create: (_) => ncm, child: FlutterPIMApp()));
   //services.init().then((value) => runApp(FlutterPIMApp()));
 }
@@ -47,6 +63,7 @@ class FlutterPIMApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: LoginView(), //main container, should be a scaffold
+      debugShowCheckedModeBanner: false,
     );
   }
 }

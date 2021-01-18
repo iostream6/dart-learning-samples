@@ -37,8 +37,8 @@ class _NotesGridPageState extends State<NotesGridPage> {
             crossAxisSpacing: 6,
             mainAxisSpacing: 6,
             crossAxisCount: _colsForStaggeredView(context),
-            children: context.watch<dao.NotesChangeManager>().notes.map((e) => NotesGridPageTile(e)).toList(),
-            staggeredTiles: context.watch<dao.NotesChangeManager>().notes.map((e) => StaggeredTile.fit(1)).toList(),
+            children: context.watch<dao.EntityChangeManager<Note>>().entities.map((e) => NotesGridPageTile(e)).toList(),
+            staggeredTiles: context.watch<dao.EntityChangeManager<Note>>().entities.map((e) => StaggeredTile.fit(1)).toList(),
           )),
     ); //can also use MultiProvider here!
   }
@@ -70,10 +70,10 @@ class NotesGridPageTile extends StatefulWidget {
   NotesGridPageTile(this._note);
 
   @override
-  _NotesGridPageCellState createState() => _NotesGridPageCellState();
+  _NotesGridPageTileState createState() => _NotesGridPageTileState();
 }
 
-class _NotesGridPageCellState extends State<NotesGridPageTile> {
+class _NotesGridPageTileState extends State<NotesGridPageTile> {
   double _fontSize; 
 
   @override

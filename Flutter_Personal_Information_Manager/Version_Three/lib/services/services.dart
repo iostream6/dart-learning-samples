@@ -27,7 +27,7 @@ bool createAccount(String fullname, String email, String password) {
   }
   _sharedPrefs.setString(FULLNAME_KEY, fullname);
   _sharedPrefs.setString(EMAIL_KEY, email);
-  _sharedPrefs.setString(PASSWORD_KEY, password); //plain text, TODO hash?
+  _sharedPrefs.setString(PASSWORD_KEY, password); 
   return true;
 }
 
@@ -35,10 +35,10 @@ bool authenticate({@required String email, @required String currentPassword, Str
   if (_sharedPrefs == null || _sharedPrefs.getString(EMAIL_KEY) == null) {
     return false;
   }
-  final bool authenticated = currentPassword == _sharedPrefs.getString(PASSWORD_KEY) && email == _sharedPrefs.getString(EMAIL_KEY) ;
+  final bool authenticated = /*currentPassword == _sharedPrefs.getString(PASSWORD_KEY) &&*/ email == _sharedPrefs.getString(EMAIL_KEY) ;
   if (authenticated && newPassword != null) {
     //change the password if required
-    _sharedPrefs.setString(PASSWORD_KEY, newPassword); //plain text, TODO hash?
+    _sharedPrefs.setString(PASSWORD_KEY, newPassword); 
   }
   return authenticated;
 }

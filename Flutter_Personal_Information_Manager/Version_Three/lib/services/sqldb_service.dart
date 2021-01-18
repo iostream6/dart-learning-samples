@@ -1,6 +1,7 @@
 /*
  * 2021.01.08  - Created
- * 2021.01.09  - Added record update() support 
+ * 2021.01.09  - Added record update() support
+ * 2021.01.18  - Added generic EntityChangeManager class to replace specific entity managers 
  */
 import '../models/models.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -12,6 +13,9 @@ const _DATABASE_NAME = 'fx_pim.db';
 
 const NOTES_TABLE_NAME = 'notes';
 const _NOTES_TABLE_SCHEMA = {'id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'title': 'BLOB', 'body': 'BLOB', 'created': 'INTEGER', 'edited': 'INTEGER', 'color': 'INTEGER', 'archived': 'INTEGER'};
+
+const CONTACTS_TABLE_NAME = 'contacts';
+const _CONTACTS_TABLE_SCHEMA = {'id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'firstname': 'STRING', 'lastname': 'STRING', 'email': 'STRING', 'numbers': 'String'};
 
 Database _database;
 
@@ -34,6 +38,7 @@ Future<Database> _initDB() async {
   Database dbConnection = await openDatabase(dbPath, version: 1, onCreate: (Database db, int version) async {
     print('executing create query from onCreate callback');
     await db.execute(_buildCreateTableQuery(NOTES_TABLE_NAME, _NOTES_TABLE_SCHEMA));
+    await db.execute(_buildCreateTableQuery(CONTACTS_TABLE_NAME, _CONTACTS_TABLE_SCHEMA));
   });
 
   return dbConnection;
@@ -79,42 +84,49 @@ Future<bool> delete(Transformable t, String tableName) async {
   return false;
 }
 
-class NotesChangeManager with ChangeNotifier {
-  List<Note> notes;
+class EntityChangeManager<T extends Transformable> with ChangeNotifier {
+  final String table;
+  final String orderBy;
+  final String whereString;
+  final List<dynamic> whereArgs;
+  List entities;
+
+  final Function mapper;
+
+  EntityChangeManager(this.table, this.orderBy, this.whereString, this.whereArgs, this.mapper);
+
   void init() async {
-    select(NOTES_TABLE_NAME, orderByString: 'edited desc', whereString: 'archived = ?', whereArgs: [0]).then((List<Map<String, dynamic>> res) {
-      notes = res.map((e) => Note.fromBLOB(e)).toList();
-      sendChangeNotification();
+    select(table, orderByString: orderBy, whereString: whereString, whereArgs: whereArgs).then((List<Map<String, dynamic>> res) {
+      //print('Getting ready');
+      //xx =  res.map(mapper).toList();
+      entities = res.map(mapper).toList();
+      notifyListeners();
     });
   }
 
-  void insertNote(Note note) {
-    insert(note, NOTES_TABLE_NAME).then((int id) {
+  void insertEntity(T entity) {
+    insert(entity, table).then((int id) {
       if (id > 0) {
-        notes.add(note);
-        sendChangeNotification();
+        entities.add(entity);
+        notifyListeners();
       }
     });
   }
 
-  void updateNote(Note note) {
-    update(note, NOTES_TABLE_NAME).then((int count) {
+  void updateEntity(T entity) {
+    update(entity, table).then((int count) {
       if (count > 0) {
-        sendChangeNotification();
+        notifyListeners();
       }
     });
   }
 
-  void deleteNote(Note note) {
-    delete(note, NOTES_TABLE_NAME).then((bool success) {
+  void deleteEntity(T entity) {
+    delete(entity, table).then((bool success) {
       if (success) {
-        notes.removeWhere((element) => element.id == note.id);
-        sendChangeNotification();
+        entities.removeWhere((element) => element.id == entity.id);
+        notifyListeners();
       }
     });
-  }
-
-  void sendChangeNotification() {
-    notifyListeners();
   }
 }

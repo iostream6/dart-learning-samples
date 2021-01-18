@@ -26,7 +26,6 @@ class _NoteViewState extends State<NoteView> {
   final FocusNode _titleFocus = FocusNode();
   final FocusNode _bodyFocus = FocusNode();
   final GlobalKey<ScaffoldState> _globalKey = new GlobalKey<ScaffoldState>();
-  //Note _safeEditNote;
   //
   Color _color;
   //
@@ -35,7 +34,6 @@ class _NoteViewState extends State<NoteView> {
   @override
   void initState() {
     super.initState();
-    //Note safeEditNote = Note.fromOther(widget._note);
     _titleController.text = widget._note.title;
     _contentController.text = widget._note.body;
     _color = Color(widget._note.color.value);
@@ -85,18 +83,18 @@ class _NoteViewState extends State<NoteView> {
       ),
     ));
 
-    actions.add(Padding(
-      padding: EdgeInsets.symmetric(horizontal: 5),
-      child: InkWell(
-        child: GestureDetector(
-          //!onTap: () => _archivePopup(context),
-          child: Icon(
-            Icons.archive,
-            //color: ViewProperties.FONT_COLOR,
-          ),
-        ),
-      ),
-    ));
+    // actions.add(Padding(
+    //   padding: EdgeInsets.symmetric(horizontal: 5),
+    //   child: InkWell(
+    //     child: GestureDetector(
+    //       //!onTap: () => _archivePopup(context),
+    //       child: Icon(
+    //         Icons.archive,
+    //         //color: ViewProperties.FONT_COLOR,
+    //       ),
+    //     ),
+    //   ),
+    // ));
 
     actions.add(Padding(
       padding: EdgeInsets.symmetric(horizontal: 5),
@@ -202,11 +200,11 @@ class _NoteViewState extends State<NoteView> {
 
     widget._note.edited = DateTime.now();
 
-    dao.NotesChangeManager ncm = Provider.of<dao.NotesChangeManager>(ctx, listen: false);
+    dao.EntityChangeManager<Note> ncm = Provider.of<dao.EntityChangeManager<Note>>(ctx, listen: false);
     if (widget._note.id != null) {
-      ncm.updateNote(widget._note);
+      ncm.updateEntity(widget._note);
     } else {
-      ncm.insertNote(widget._note);
+      ncm.insertEntity(widget._note);
     }
 
     setState(() => _requiresSave = false);
@@ -237,7 +235,6 @@ class _NoteViewState extends State<NoteView> {
   }
 
   void _exitWithoutSaving(BuildContext context) {
-    //!_persistenceTimer.cancel();
     Navigator.of(context).pop();
   }
 
@@ -251,10 +248,9 @@ class _NoteViewState extends State<NoteView> {
             actions: <Widget>[
               FlatButton(
                   onPressed: () {
-                    //!_persistenceTimer.cancel();
-                    dao.NotesChangeManager ncm = Provider.of<dao.NotesChangeManager>(context, listen: false);
+                    dao.EntityChangeManager<Note> ncm = Provider.of<dao.EntityChangeManager<Note>>(context, listen: false);
                     Navigator.of(context).pop();
-                    ncm.deleteNote(widget._note);
+                    ncm.deleteEntity(widget._note);
                     Navigator.of(context).pop();
                   },
                   child: Text("Yes")),
