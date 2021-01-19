@@ -83,19 +83,6 @@ class _NoteViewState extends State<NoteView> {
       ),
     ));
 
-    // actions.add(Padding(
-    //   padding: EdgeInsets.symmetric(horizontal: 5),
-    //   child: InkWell(
-    //     child: GestureDetector(
-    //       //!onTap: () => _archivePopup(context),
-    //       child: Icon(
-    //         Icons.archive,
-    //         //color: ViewProperties.FONT_COLOR,
-    //       ),
-    //     ),
-    //   ),
-    // ));
-
     actions.add(Padding(
       padding: EdgeInsets.symmetric(horizontal: 5),
       child: InkWell(
@@ -202,7 +189,7 @@ class _NoteViewState extends State<NoteView> {
 
     dao.EntityChangeManager<Note> ncm = Provider.of<dao.EntityChangeManager<Note>>(ctx, listen: false);
     if (widget._note.id != null) {
-      ncm.updateEntity(widget._note);
+      ncm.updateEntity(widget._note, true);
     } else {
       ncm.insertEntity(widget._note);
     }

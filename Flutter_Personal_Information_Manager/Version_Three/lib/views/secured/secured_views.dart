@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'notes_list_view.dart';
 import 'note_view.dart';
+import 'contacts_list_view.dart';
 import '../../models/models.dart';
 //import '../login_view.dart';
 
@@ -43,21 +44,11 @@ class _SecuredPageViewState extends State<SecuredPageView> {
           onPageChanged: (int index) => setState(() => _selectedViewIndex = index),
           pageSnapping: true,
           scrollDirection: Axis.horizontal,
-          children: <Widget>[NotesGridPage(ViewType.Staggered), _getContactsListWidget(), _getXXXListWidget()],
+          children: <Widget>[NotesGridPage(ViewType.Staggered), ContactsPage(), _getXXXListWidget()],
         ),
       ),
       bottomNavigationBar: _bottomNavBar(),
     );
-  }
-
-  Widget _getContactsListWidget() {
-    return Container(
-        color: Colors.pink,
-        child: Center(
-            child: Text(
-          'This is Widget 2',
-          style: TextStyle(fontSize: 25, color: Colors.black),
-        )));
   }
 
   Widget _getXXXListWidget() {

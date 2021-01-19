@@ -38,18 +38,23 @@ void main() async {
 
   // Contact c = Contact(0, 'Osho', 'Ilamah', 'oilamah@wonders.com', [ContactNumber('052222246', 0, 0), ContactNumber('0846667121', 1, 1)]);
   // ccm.insertEntity(c);
-  // c = Contact(0, 'Florence', 'Ilamah', 'feilamah@xxxs.com', [ContactNumber('052222246', 0, 0), ContactNumber('0803888887', 1, 1)]);
+  // c = Contact(1, 'Florence', 'Ilamah', 'feilamah@xxxs.com', [ContactNumber('052222246', 0, 0), ContactNumber('0803888887', 1, 1)]);
   // ccm.insertEntity(c);
 
-  List<Map<String, dynamic>> res = await dao.select(dao.CONTACTS_TABLE_NAME);
-  res.forEach((element) {
-    Contact c = Contact.fromMap(element);
-    print('trying');
-  });
+  // List<Map<String, dynamic>> res = await dao.select(dao.CONTACTS_TABLE_NAME);
+  // res.forEach((element) {
+  //   Contact c = Contact.fromMap(element);
+  //   print('trying');
+  // });
 
-
-  runApp(ChangeNotifierProvider(create: (_) => ncm, child: FlutterPIMApp()));
-  //services.init().then((value) => runApp(FlutterPIMApp()));
+  runApp(MultiProvider(providers: [
+    ChangeNotifierProvider.value(
+      value: ncm,//do not use default constructor to expose existing object | create | see docs
+    ),
+    ChangeNotifierProvider.value(
+      value: ccm,
+    )
+  ], child: FlutterPIMApp()));
 }
 
 class FlutterPIMApp extends StatelessWidget {
