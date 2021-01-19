@@ -97,8 +97,6 @@ class EntityChangeManager<T extends Transformable> with ChangeNotifier {
 
   void init() async {
     select(table, orderByString: orderBy, whereString: whereString, whereArgs: whereArgs).then((List<Map<String, dynamic>> res) {
-      //print('Getting ready');
-      //xx =  res.map(mapper).toList();
       entities = res.map(mapper).toList();
       notifyListeners();
     });
@@ -113,9 +111,9 @@ class EntityChangeManager<T extends Transformable> with ChangeNotifier {
     });
   }
 
-  void updateEntity(T entity) {
+  void updateEntity(T entity, bool notify) {
     update(entity, table).then((int count) {
-      if (count > 0) {
+      if (count > 0 && notify) {
         notifyListeners();
       }
     });
