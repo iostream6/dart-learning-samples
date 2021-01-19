@@ -16,31 +16,30 @@ abstract class Transformable {
   Transformable._(this.id);
 }
 
-class Contact extends Transformable {
-  String firstname, lastname, email;
-  List<ContactNumber> numbers;
+class Contact extends Transformable with ChangeNotifier {
+  String _firstname, _lastname, _email;
+  List<ContactNumber> _numbers;
 
-  Contact(id, this.firstname, this.lastname, this.email, this.numbers) : super._(id);
+  Contact(id, this._firstname, this._lastname, this._email, this._numbers) : super._(id);
 
   static Contact fromMap(Map<String, dynamic> dbMap) {
-    Contact _nc = Contact(dbMap['id'], dbMap['firstname'], dbMap['lastname'], dbMap['email'], null);
-    _nc.numbers = [];
-    List _numbers = dbMap['numbers']; //TODO _TypeError (type 'String' is not a subtype of type 'List<dynamic>')
-
-    _numbers.forEach((contactNumberMap) {
-      ContactNumber _cnc = ContactNumber.fromMap(contactNumberMap);
-      _nc.numbers.add(_cnc);
+    Contact __nc = Contact(dbMap['id'], dbMap['firstname'], dbMap['lastname'], dbMap['email'], null);
+    __nc._numbers = [];
+    List contactNumbersMapList = jsonDecode(dbMap['numbers']);
+    contactNumbersMapList.forEach((contactNumberMap) {
+      ContactNumber contactNumber = ContactNumber.fromMap(contactNumberMap);
+      __nc._numbers.add(contactNumber);
     });
-    return _nc;
+    return __nc;
   }
 
   @override
   Map<String, dynamic> asMap() {
     Map<String, dynamic> map = {
-      'firstname': firstname,
-      'lastname': lastname,
-      'email': email,
-      'numbers': numbers.toString(),
+      'firstname': _firstname,
+      'lastname': _lastname,
+      'email': _email,
+      'numbers': jsonEncode(_numbers),
     };
     if (id != null) {
       map['id'] = id;
@@ -50,7 +49,29 @@ class Contact extends Transformable {
 
   @override
   String asString() {
-    return {'id': id, 'firstname': firstname, 'lastname': lastname, 'email': email, 'numbers': numbers}.toString();
+    return {'id': id, 'firstname': _firstname, 'lastname': _lastname, 'email': _email, 'numbers': _numbers}.toString();
+  }
+
+  String getFirstname() => _firstname;
+
+  void setFirstname(String firstname) {
+    if (firstname != _firstname) {
+      _firstname = firstname;
+      notifyListeners();
+    }
+  }
+
+  String getLastname() => _lastname;
+
+  void setLastname(String lastname) {
+    if (lastname != _lastname) {
+      _lastname = lastname;
+      notifyListeners();
+    }
+  }
+
+  String getPreferredNumber() {
+    return _numbers.length > 0 ? _numbers.first.number : '';
   }
 }
 
@@ -63,17 +84,12 @@ class ContactNumber {
 
   ContactNumber.fromMap(Map<String, dynamic> dbMap) : this(dbMap['number'], dbMap['priority'], dbMap['cid']);
 
-  Map<String, dynamic> asMap() {
+  Map<String, dynamic> toJson() {
     var map = {'number': number, 'priority': priority};
     if (cid != null) {
       map['cid'] = cid;
     }
     return map;
-  }
-
-  @override
-  String toString() {
-    return asMap().toString();
   }
 }
 
@@ -128,9 +144,5 @@ class Note extends Transformable with ChangeNotifier {
   @override
   String asString() {
     return {'id': id, 'title': title, 'body': body, 'created': _epochFromDate(created), 'edited': _epochFromDate(edited), 'color': color.toString(), 'archived': archived}.toString();
-  }
-
-  void sendChangeNotification() {
-    notifyListeners();
   }
 }
