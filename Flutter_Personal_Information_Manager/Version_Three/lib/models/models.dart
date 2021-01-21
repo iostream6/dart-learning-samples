@@ -17,13 +17,13 @@ abstract class Transformable {
 }
 
 class Contact extends Transformable with ChangeNotifier {
-  String _firstname, _lastname, _email;
+  String _fullname, _email;
   List<ContactNumber> _numbers;
 
-  Contact(id, this._firstname, this._lastname, this._email, this._numbers) : super._(id);
+  Contact([id, this._fullname, this._email, this._numbers]) : super._(id);
 
   static Contact fromMap(Map<String, dynamic> dbMap) {
-    Contact __nc = Contact(dbMap['id'], dbMap['firstname'], dbMap['lastname'], dbMap['email'], null);
+    Contact __nc = Contact(dbMap['id'], dbMap['fullname'], dbMap['email'], null);
     __nc._numbers = [];
     List contactNumbersMapList = jsonDecode(dbMap['numbers']);
     contactNumbersMapList.forEach((contactNumberMap) {
@@ -36,8 +36,7 @@ class Contact extends Transformable with ChangeNotifier {
   @override
   Map<String, dynamic> asMap() {
     Map<String, dynamic> map = {
-      'firstname': _firstname,
-      'lastname': _lastname,
+      'fullname': _fullname,
       'email': _email,
       'numbers': jsonEncode(_numbers),
     };
@@ -49,45 +48,78 @@ class Contact extends Transformable with ChangeNotifier {
 
   @override
   String asString() {
-    return {'id': id, 'firstname': _firstname, 'lastname': _lastname, 'email': _email, 'numbers': _numbers}.toString();
+    return {'id': id, 'fullname': _fullname, 'email': _email, 'numbers': _numbers}.toString();
   }
 
-  String getFirstname() => _firstname;
+  String get fullname => _fullname;
 
-  void setFirstname(String firstname) {
-    if (firstname != _firstname) {
-      _firstname = firstname;
+  set fullname(String fullname) {
+    if (fullname != _fullname && fullname != null) {
+      _fullname = fullname;
       notifyListeners();
     }
   }
 
-  String getLastname() => _lastname;
+  String get email => _email;
 
-  void setLastname(String lastname) {
-    if (lastname != _lastname) {
-      _lastname = lastname;
+  set email(String email) {
+    if (_email != email && email != null) {
+      _email = email;
       notifyListeners();
     }
   }
 
-  String getPreferredNumber() {
-    return _numbers.length > 0 ? _numbers.first.number : '';
+  bool _numbersEquals(List<String> nums) {
+    if (_numbers == null || nums.length != _numbers.length) {
+      return false;
+    }
+    for (int i = 0; i < nums.length; i++) {
+      if (nums[i] != _numbers[i]._number) {
+        return false;
+      }
+    }
+    return true;
   }
+
+  set numbers(List<String> nums) {
+    if (_numbersEquals(nums) == false) {
+      if (_numbers.length > 0) {
+        _numbers[0]._number = nums[0]; //only need to change the number!
+      } else {
+        _numbers.add(ContactNumber(nums[0], 0, 0, 0));
+      }
+      if (nums.length > 1) {
+        if (_numbers.length > 1) {
+          _numbers[1]._number = nums[1]; //only need to change the number!
+        } else {
+          _numbers.add(ContactNumber(nums[1], 1, 1, 1));
+        }
+      }
+    }
+  }
+
+  int get numbersCount => _numbers.length;
+
+  ContactNumber get firstNumber => _numbers.length > 0 ? _numbers[0] : null;
+
+  ContactNumber get secondNumber => _numbers.length > 1 ? _numbers[1] : null;
+
+  String get preferredNumber => _numbers.length > 0 ? _numbers.first._number : '';
 }
 
 class ContactNumber {
-  String number;
-  int priority;
-  int cid;
+  String _number;
+  int _type, _priority;
+  int _cid;
 
-  ContactNumber(this.number, this.priority, this.cid);
+  ContactNumber(this._number, this._type, this._priority, this._cid);
 
-  ContactNumber.fromMap(Map<String, dynamic> dbMap) : this(dbMap['number'], dbMap['priority'], dbMap['cid']);
+  ContactNumber.fromMap(Map<String, dynamic> dbMap) : this(dbMap['number'], dbMap['type'], dbMap['priority'], dbMap['cid']);
 
   Map<String, dynamic> toJson() {
-    var map = {'number': number, 'priority': priority};
-    if (cid != null) {
-      map['cid'] = cid;
+    var map = {'number': _number, 'type': _type, 'priority': _priority};
+    if (_cid != null) {
+      map['cid'] = _cid;
     }
     return map;
   }

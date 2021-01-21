@@ -1,7 +1,8 @@
 /*
  * 2021.01.08  - Created
  * 2021.01.09  - Added record update() support
- * 2021.01.18  - Added generic EntityChangeManager class to replace specific entity managers 
+ * 2021.01.18  - Added generic EntityChangeManager class to replace specific entity managers
+ * 2021.01.21  - Changed Contact table schema (fullname instead of first and lastname)
  */
 import '../models/models.dart';
 import 'package:sqflite/sqlite_api.dart';
@@ -15,7 +16,7 @@ const NOTES_TABLE_NAME = 'notes';
 const _NOTES_TABLE_SCHEMA = {'id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'title': 'BLOB', 'body': 'BLOB', 'created': 'INTEGER', 'edited': 'INTEGER', 'color': 'INTEGER', 'archived': 'INTEGER'};
 
 const CONTACTS_TABLE_NAME = 'contacts';
-const _CONTACTS_TABLE_SCHEMA = {'id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'firstname': 'STRING', 'lastname': 'STRING', 'email': 'STRING', 'numbers': 'String'};
+const _CONTACTS_TABLE_SCHEMA = {'id': 'INTEGER PRIMARY KEY AUTOINCREMENT', 'fullname': 'STRING', 'email': 'STRING', 'numbers': 'String'};
 
 Database _database;
 
