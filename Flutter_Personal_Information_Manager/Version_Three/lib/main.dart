@@ -33,7 +33,7 @@ void main() async {
   dao.EntityChangeManager<Note> ncm = dao.EntityChangeManager<Note>(dao.NOTES_TABLE_NAME, 'edited desc', 'archived = ?', [0], (e) => Note.fromBLOB(e));
   ncm.init();
 
-  dao.EntityChangeManager<Contact> ccm = dao.EntityChangeManager<Contact>(dao.CONTACTS_TABLE_NAME, 'firstname desc', null, null, (e) => Contact.fromMap(e));
+  dao.EntityChangeManager<Contact> ccm = dao.EntityChangeManager<Contact>(dao.CONTACTS_TABLE_NAME, 'fullname desc', null, null, (e) => Contact.fromMap(e));
   ccm.init();
 
   // Contact c = Contact(0, 'Osho', 'Ilamah', 'oilamah@wonders.com', [ContactNumber('052222246', 0, 0), ContactNumber('0846667121', 1, 1)]);
@@ -44,7 +44,7 @@ void main() async {
   // List<Map<String, dynamic>> res = await dao.select(dao.CONTACTS_TABLE_NAME);
   // res.forEach((element) {
   //   Contact c = Contact.fromMap(element);
-  //   print('trying');
+  //   print('Contact: ${c.asString()}');
   // });
 
   runApp(MultiProvider(providers: [
@@ -64,7 +64,7 @@ class FlutterPIMApp extends StatelessWidget {
       title: 'FlutterPIM',
       theme: ThemeData(
         // This is the theme of your application.
-        primarySwatch: Colors.blue,
+        //primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: LoginView(), //main container, should be a scaffold

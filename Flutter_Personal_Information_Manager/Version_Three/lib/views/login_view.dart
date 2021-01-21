@@ -191,7 +191,7 @@ class _CreateAccountViewState extends State<CreateAccountView> {
           titleSpacing: 0,
           //backgroundColor: Colors.transparent,
           automaticallyImplyLeading: true,
-          elevation: 0,
+          //elevation: 0,
           title: Text('Create New Account'),
         ),
         backgroundColor: Colors.white,

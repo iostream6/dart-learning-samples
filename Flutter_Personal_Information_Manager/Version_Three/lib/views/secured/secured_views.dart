@@ -1,12 +1,14 @@
 /*
  * 2021.01.03  - Created
  * 2021.01.09  - Added add() action support to allow adding objects(Notes)
+ * 2021.01.21  - Added add() action support to allow adding Contacts
  */
 
 import 'package:flutter/material.dart';
 import 'notes_list_view.dart';
 import 'note_view.dart';
 import 'contacts_list_view.dart';
+import 'contact_view.dart';
 import '../../models/models.dart';
 //import '../login_view.dart';
 
@@ -111,6 +113,8 @@ class _SecuredPageViewState extends State<SecuredPageView> {
         Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => NoteView(newNote)));
         break;
       case 1:
+        Contact newContact = Contact(null, null, null, []);
+        Navigator.push(ctx, MaterialPageRoute(builder: (ctx) => ContactView(newContact)));
         break;
       case 2:
         break;

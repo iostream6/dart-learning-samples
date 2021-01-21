@@ -109,7 +109,7 @@ class _NoteViewState extends State<NoteView> {
       padding: EdgeInsets.symmetric(horizontal: 5),
       child: InkWell(
         child: GestureDetector(
-          onTap: () => {_saveAndStartNewNote(context)},
+          onTap: _requiresSave ? () => _saveAndStartNewNote(context): null,
           child: Icon(
             Icons.add,
             //color: ViewProperties.FONT_COLOR,

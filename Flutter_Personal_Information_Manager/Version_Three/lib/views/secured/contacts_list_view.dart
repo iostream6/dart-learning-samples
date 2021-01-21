@@ -40,8 +40,8 @@ class _ContactsPageState extends State<ContactsPage> {
         child: Consumer<Contact>(builder: (_, c, __) {
           return ListTile(
             leading: FlutterLogo(size: 36.0),
-            title: Text('${c.getFirstname()} ${c.getLastname()}'),
-            subtitle: Text('${c.getPreferredNumber()}'),
+            title: Text('${c.fullname}'),
+            subtitle: Text('${c.preferredNumber}'),
           );
         }),
       ),
