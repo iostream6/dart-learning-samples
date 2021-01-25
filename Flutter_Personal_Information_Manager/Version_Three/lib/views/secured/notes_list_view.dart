@@ -1,6 +1,6 @@
 /*
  * 2021.01.08  - Created
- * 
+ * 2021.01.25  - Changed to use single font size for Notes tiles
  */
 
 //Some ideas from https://medium.com/aubergine-solutions/creating-a-note-taking-app-in-flutter-dart-f50852993cd0
@@ -121,17 +121,19 @@ class _NotesGridPageTileState extends State<NotesGridPageTile> {
   }
 
   double _determineFontSizeForContent() {
-    int charCount = widget._note.body.length + widget._note.title.length;
-    double fontSize = 20;
-    if (charCount > 110) {
-      fontSize = 12;
-    } else if (charCount > 80) {
-      fontSize = 14;
-    } else if (charCount > 50) {
-      fontSize = 16;
-    } else if (charCount > 20) {
-      fontSize = 18;
-    }
-    return fontSize;
+    // int charCount = widget._note.body.length + widget._note.title.length;
+    // double fontSize = 20;
+    // if (charCount > 110) {
+    //   fontSize = 12;
+    // } else if (charCount > 80) {
+    //   fontSize = 14;
+    // } else if (charCount > 50) {
+    //   fontSize = 16;
+    // } else if (charCount > 20) {
+    //   fontSize = 18;
+    // }
+    // return fontSize;
+
+    return 14;
   }
 }
