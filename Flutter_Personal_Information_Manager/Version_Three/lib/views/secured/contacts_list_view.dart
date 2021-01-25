@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../models/models.dart';
 import '../../services/sqldb_service.dart' as dao;
 import 'package:provider/provider.dart';
+import 'contact_view.dart';
 
 class ContactsPage extends StatefulWidget {
   @override
@@ -42,6 +43,7 @@ class _ContactsPageState extends State<ContactsPage> {
             leading: FlutterLogo(size: 36.0),
             title: Text('${c.fullname}'),
             subtitle: Text('${c.preferredNumber}'),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (ctx) => ContactView(contact))),
           );
         }),
       ),

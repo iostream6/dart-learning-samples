@@ -1,6 +1,6 @@
 /*
  * 2021.01.21  - Created | Add new contact support implemented.
- * 
+ * 2021.01.25  - Added implementation for 'edit' and 'delete' contact
  */
 import 'package:flutter/material.dart';
 import '../../models/models.dart';
@@ -25,14 +25,23 @@ class _ContactViewState extends State<ContactView> {
   final _formKey = GlobalKey<FormState>();
   bool _autovalidate = false; //if true, form is validated after each change.
 
-  String _errorMessage;
+ // String _errorMessage;
 
   @override
   void initState() {
     super.initState();
-    //_fullnameTextController.text = widget._contact.fullname;
-    //_lastnameTextController.text = widget._contact.lastname;
-    //_emailTextController.text = widget._contact.email;
+    _fullnameTextController.text = widget._contact.fullname;
+    _emailTextController.text = widget._contact.email;
+    final int numbers = widget._contact.numbersCount;
+    switch (numbers) {
+      case 1:
+        _firstNumberTextController.text = widget._contact.firstNumber.number;
+        break;
+      case 2:
+        _firstNumberTextController.text = widget._contact.firstNumber.number;
+        _secondNumberTextController.text = widget._contact.secondNumber.number;
+        break;
+    }
   }
 
   @override
@@ -85,12 +94,12 @@ class _ContactViewState extends State<ContactView> {
               SizedBox(
                 height: 10.0,
               ),
-              _buildSaveContactButton(),
-              _buildDeleteContactButton(),
+              _buildSaveContactButton(ctx),
+              _buildDeleteContactButton(ctx),
               SizedBox(
                 height: 10.0,
               ),
-              _buildErrorTextWidget(_errorMessage)
+              //_buildErrorTextWidget(_errorMessage)
             ])));
   }
 
@@ -120,7 +129,7 @@ class _ContactViewState extends State<ContactView> {
     return TextFormField(
       controller: _firstNumberTextController,
       decoration: InputDecoration(border: OutlineInputBorder(), hintText: "Primary number", prefixIcon: Icon(Icons.phone), fillColor: Colors.white, filled: true),
-      validator: (value) => _validateNumber(value,  true),
+      validator: (value) => _validateNumber(value, true),
     );
   }
 
@@ -128,25 +137,32 @@ class _ContactViewState extends State<ContactView> {
     return TextFormField(
       controller: _secondNumberTextController,
       decoration: InputDecoration(border: OutlineInputBorder(), hintText: "Alternate number", prefixIcon: Icon(Icons.phone_enabled), fillColor: Colors.white, filled: true),
-      validator: (value) => _validateNumber(value,  false),
+      validator: (value) => _validateNumber(value, false),
     );
   }
 
-  Widget _buildSaveContactButton() {
+  Widget _buildSaveContactButton(BuildContext ctx) {
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(padding: EdgeInsets.symmetric(vertical: 10.0)),
         //color: Theme.of(context).primaryColor,
         onPressed: () {
-          _errorMessage = null;
+          //_errorMessage = null;
           if (_formKey.currentState.validate()) {
             final Contact c = widget._contact;
             c.fullname = _fullnameTextController.text;
             c.email = _emailTextController.text;
-            c.numbers = (_secondNumberTextController.text == null || _secondNumberTextController.text.isEmpty) ? [_firstNumberTextController.text]: [_firstNumberTextController.text, _secondNumberTextController.text];
-            Provider.of<dao.EntityChangeManager<Contact>>(context, listen: false).insertEntity(c);
-            Navigator.pop(context);
+            c.numbers = (_secondNumberTextController.text == null || _secondNumberTextController.text.isEmpty)
+                ? [_firstNumberTextController.text]
+                : [_firstNumberTextController.text, _secondNumberTextController.text];
+            final dao.EntityChangeManager<Contact> ecm = Provider.of<dao.EntityChangeManager<Contact>>(ctx, listen: false);
+            if(c.id == null){
+              ecm.insertEntity(c);
+            }else{
+              ecm.updateEntity(c, true);
+            }
+            Navigator.pop(ctx);
           } else {
             //submissiom attempt has failed, so we want the form to validate on each change,
             //rather than wait till next submit, so that the user has realtime feedback on whether issues are fixed
@@ -160,13 +176,15 @@ class _ContactViewState extends State<ContactView> {
     );
   }
 
-  Widget _buildDeleteContactButton() {
+  Widget _buildDeleteContactButton(BuildContext ctx) {
     return SizedBox(
       width: double.infinity,
       child: Visibility(
         child: OutlinedButton(
           onPressed: () {
-            //Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => CreateAccountView()));
+            //TODO Shoot out dialog to make sure!!
+            Provider.of<dao.EntityChangeManager<Contact>>(ctx, listen: false).deleteEntity(widget._contact);
+            Navigator.pop(ctx);
           },
           child: Text("Delete", style: TextStyle(color: Colors.blue)),
         ),
@@ -175,7 +193,7 @@ class _ContactViewState extends State<ContactView> {
     );
   }
 
-  Widget _buildErrorTextWidget(String message) => message == null ? Text("") : Text(message, style: TextStyle(color: Colors.red));
+  //Widget _buildErrorTextWidget(String message) => message == null ? Text("") : Text(message, style: TextStyle(color: Colors.red));
 
   String _validateEmail(String email) {
     RegExp regex = RegExp(r'\w+@\w+\.\w+');
@@ -190,7 +208,7 @@ class _ContactViewState extends State<ContactView> {
       return 'Primary phone number is required';
     }
 
-    if(!isRequired && (number == null || number.isEmpty)){
+    if (!isRequired && (number == null || number.isEmpty)) {
       return null;
     }
     //https://stackoverflow.com/a/55552272
@@ -201,9 +219,5 @@ class _ContactViewState extends State<ContactView> {
     }
     return null;
   }
-  
-  
-  // void _saveAndStartNewContact(BuildContext context) {}
 
-  // void _saveContactObject(BuildContext context) {}
 }

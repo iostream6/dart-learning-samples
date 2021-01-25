@@ -112,6 +112,8 @@ class ContactNumber {
   int _type, _priority;
   int _cid;
 
+  String get number => _number;
+
   ContactNumber(this._number, this._type, this._priority, this._cid);
 
   ContactNumber.fromMap(Map<String, dynamic> dbMap) : this(dbMap['number'], dbMap['type'], dbMap['priority'], dbMap['cid']);
